@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORVYNT StudyFlow V2.0 | AI Study Companion</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dashboardBg: '#080B12',
+                        electricBlue: '#00F0FF',
+                        electricBlueDark: '#00a8ff',
+                        silverText: '#E0E6ED',
+                        silverMuted: '#A0AEC0',
+                        glassBg: 'rgba(15, 23, 42, 0.65)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Global & Scrollbars */
+        body {
+            background-color: #080B12;
+            color: #E0E6ED;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #080B12; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00F0FF; }
+
+        /* Typography & Visual Effects */
+        .brand-wordmark {
+            letter-spacing: 0.38em;
+            background: linear-gradient(135deg, #7dd3fc 0%, #00F0FF 50%, #bae6fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.35));
+        }
+
+        .text-silver-gradient {
+            background: linear-gradient(135deg, #FFFFFF 0%, #E0E6ED 40%, #A0AEC0 80%, #F8FAFC 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.08);
+        }
+
+        .electric-divider {
+            height: 1.5px;
+            background: linear-gradient(90deg, rgba(0,240,255,0.05) 0%, rgba(0,240,255,0.95) 30%, rgba(0,240,255,0.95) 70%, rgba(0,240,255,0.05) 100%);
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.45);
+        }
+
+        .electric-glow {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+        }
+
+        /* Printable A4 Container Proportions */
+        .a4-container {
+            width: 100%;
+            max-width: 210mm;
+            min-height: 297mm;
+            box-sizing: border-box;
+            background-color: #080B12;
+        }
+
+        /* Inputs & Interactive Elements */
+        input[type="text"], input[type="date"], input[type="number"], textarea, select {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #f1f5f9;
+        }
+
+        input[type="text"]::placeholder, textarea::placeholder {
+            color: #475569;
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid rgba(0, 240, 255, 0.6);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            background-color: rgba(15, 23, 42, 0.7);
+            flex-shrink: 0;
+        }
+
+        .custom-checkbox:checked {
+            background-color: #00F0FF;
+            border-color: #00F0FF;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.7);
+        }
+
+        .custom-checkbox:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #080B12;
+            font-size: 10px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Tri-state Status Badges */
+        .status-not-started { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); }
+        .status-in-progress { background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); }
+        .status-completed { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+
+        /* Print Engine Styles */
+        @media print {
+            body {
+                background-color: #080B12 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print { display: none !important; }
+            .planner-page { display: flex !important; page-break-after: always; }
+            .a4-container {
+                width: 210mm !important;
+                height: 297mm !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 8mm 10mm !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            .electric-divider {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    
+    .quick-tile {
+      display:flex; align-items:center; gap:.65rem; min-height:48px; padding:.7rem .8rem;
+      border:1px solid rgba(148,163,184,.18); border-radius:12px; background:rgba(15,23,42,.78);
+      color:#e2e8f0; font-size:12px; font-weight:650; text-align:left; transition:.18s ease;
+    }
+    .quick-tile i { color:#67e8f9; width:16px; text-align:center; }
+    .quick-tile:hover,.quick-tile:focus-visible { border-color:rgba(34,211,238,.65); background:rgba(8,145,178,.12); outline:none; }
+    .ai-fab { position:fixed; right:16px; bottom:16px; z-index:80; border-radius:999px; background:#67e8f9; color:#07111c; padding:13px 17px; font-weight:800; box-shadow:0 8px 30px rgba(34,211,238,.25); }
+    .ai-overlay { position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center; padding:12px; background:rgba(2,6,23,.78); backdrop-filter:blur(8px); }
+    .ai-overlay.open { display:flex; }
+    .ai-panel { width:min(100%,620px); height:min(82vh,720px); display:flex; flex-direction:column; border:1px solid rgba(103,232,249,.35); border-radius:20px; overflow:hidden; background:#080f1d; box-shadow:0 20px 80px rgba(0,0,0,.5); }
+    .ai-messages { flex:1; overflow:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+    .ai-bubble { max-width:90%; white-space:pre-wrap; overflow-wrap:anywhere; padding:11px 13px; border-radius:14px; font-size:13px; line-height:1.55; }
+    .ai-user { align-self:flex-end; background:#164e63; color:#ecfeff; border-bottom-right-radius:4px; }
+    .ai-assistant { align-self:flex-start; background:#172033; color:#e2e8f0; border:1px solid #293548; border-bottom-left-radius:4px; }
+    .ai-chip { border:1px solid rgba(103,232,249,.3); color:#a5f3fc; background:rgba(8,145,178,.1); padding:7px 10px; border-radius:999px; font-size:11px; }
+    @media(max-width:480px) { .ai-fab { right:12px; bottom:12px; } }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-3 px-2 sm:px-4 selection:bg-electricBlue selection:text-slate-950">
+
+    <!-- TOP APPLICATION NAVBAR & ACTION CONTROL BAR -->
+    <header class="no-print w-full max-w-[210mm] mb-4 bg-slate-900/90 backdrop-blur border border-slate-800 p-3 rounded-xl shadow-2xl flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2.5">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-electricBlue/20 border border-electricBlue flex items-center justify-center text-electricBlue font-black text-xs shadow-lg shadow-electricBlue/20">
+                    O
+                </div>
+                <div>
+                    <h1 class="text-xs font-bold text-slate-100 tracking-wide flex items-center gap-1.5">
+                        ORVYNT StudyFlow
+                        <span class="text-[10px] bg-electricBlue/10 text-electricBlue px-1.5 py-0.5 rounded border border-electricBlue/30 font-mono">ICSE ED.</span>
+                    </h1>
+                    <p class="text-[10px] text-slate-400">Interactive Academic Planner & Syllabus System</p>
+                </div>
+            </div>
+
+            <!-- Global Action Toolbar -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Save Status Indicator -->
+                <div id="saveIndicator" class="text-[11px] px-2.5 py-1 rounded-md bg-slate-800 text-slate-400 flex items-center gap-1.5 border border-slate-700/60">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span id="saveText">Saved to device</span>
+                </div>
+
+                <!-- Backup & Restore Buttons -->
+                <button onclick="exportBackupJSON()" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-md border border-slate-700 transition flex items-center gap-1" title="Download JSON Backup">
+                    <i class="fa-solid fa-download text-electricBlue"></i> Export JSON
+                </button>
+                <label class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-md border border-slate-700 cursor-pointer transition flex items-center gap-1" title="Restore from JSON Backup">
+                    <i class="fa-solid fa-upload text-amber-400"></i> Import JSON
+                    <input type="file" id="importFileInput" onchange="importBackupJSON(event)" accept=".json" class="hidden">
+                </label>
+
+                <!-- Print Options -->
+                <button onclick="triggerPrintCurrent()" class="px-2.5 py-1 text-[11px] font-medium bg-slate-800 hover:bg-slate-700 text-electricBlue rounded-md border border-electricBlue/40 transition flex items-center gap-1">
+                    <i class="fa-solid fa-print"></i> Print Page
+                </button>
+                <button onclick="triggerPrintAll()" class="px-3 py-1 text-[11px] font-semibold bg-electricBlue hover:bg-cyan-300 text-slate-950 rounded-md shadow-md shadow-electricBlue/20 transition flex items-center gap-1">
+                    <i class="fa-solid fa-file-pdf"></i> Export All A4
+                </button>
+                <button onclick="clearAllData()" class="px-2 py-1 text-[11px] bg-slate-800 hover:bg-red-950/40 text-slate-400 hover:text-red-400 rounded-md border border-slate-700 transition" title="Reset All Data">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- MODULE TAB NAVIGATION BANNER -->
+        <nav class="flex items-center gap-1 overflow-x-auto pb-1 text-xs border-t border-slate-800/80 pt-2 font-medium scrollbar-none">
+            <button onclick="switchTab('welcome')" id="tab-welcome" class="tab-btn px-3 py-1.5 rounded-lg border transition whitespace-nowrap bg-electricBlue/10 text-electricBlue border-electricBlue/40">
+                <i class="fa-solid fa-compass mr-1.5"></i>Welcome Guide
+            </button>
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-3 py-1.5 rounded-lg border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition whitespace-nowrap">
+                <i class="fa-solid fa-chart-pie mr-1.5"></i>Main Dashboard
+            </button>
+            <button onclick="switchTab('daily')" id="tab-daily" class="tab-btn px-3 py-1.5 rounded-lg border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition whitespace-nowrap">
+                <i class="fa-solid fa-calendar-day mr-1.5"></i>Daily Planner
+            </button>
+            <button onclick="switchTab('timetable')" id="tab-timetable" class="tab-btn px-3 py-1.5 rounded-lg border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition whitespace-nowrap">
+                <i class="fa-solid fa-table-cells mr-1.5"></i>Weekly Timetable
+            </button>
+            <button onclick="switchTab('tracker')" id="tab-tracker" class="tab-btn px-3 py-1.5 rounded-lg border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition whitespace-nowrap">
+                <i class="fa-solid fa-list-check mr-1.5"></i>ICSE Chapter Tracker
+            </button>
+            <button onclick="switchTab('revision')" id="tab-revision" class="tab-btn px-3 py-1.5 rounded-lg border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition whitespace-nowrap">
+                <i class="fa-solid fa-graduation-cap mr-1.5"></i>Exam Revision
+            </button>
+        </nav>
+    </header>
+
+
+    <!-- V2.0 QUICK START PANEL -->
+    <section class="no-print w-full max-w-[210mm] mb-4 rounded-2xl border border-cyan-400/20 bg-slate-900/80 p-4 shadow-xl">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div>
+          <p class="text-[10px] uppercase tracking-[0.3em] text-cyan-300 font-bold">ORVYNT / STUDYFLOW 2.0</p>
+          <h2 class="text-xl font-extrabold text-white">Your study space, simplified.</h2>
+          <p class="text-xs text-slate-400 mt-1">Choose an area. Start in one tap.</p>
+        </div>
+        <button onclick="openOrvyntAI()" class="rounded-xl bg-cyan-300 px-4 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-400/20">
+          <i class="fa-solid fa-sparkles mr-2"></i>Ask ORVYNT AI
+        </button>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <button onclick="switchTab('dashboard')" class="quick-tile"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></button>
+        <button onclick="switchTab('daily')" class="quick-tile"><i class="fa-solid fa-calendar-day"></i><span>Daily Planner</span></button>
+        <button onclick="switchTab('timetable')" class="quick-tile"><i class="fa-solid fa-table-cells"></i><span>Timetable</span></button>
+        <button onclick="switchTab('tracker')" class="quick-tile"><i class="fa-solid fa-list-check"></i><span>Chapter Tracker</span></button>
+        <button onclick="switchTab('revision')" class="quick-tile"><i class="fa-solid fa-graduation-cap"></i><span>Exam Revision</span></button>
+        <button onclick="switchTab('welcome')" class="quick-tile"><i class="fa-solid fa-compass"></i><span>Quick Guide</span></button>
+      </div>
+      <p class="text-[10px] text-slate-500 mt-3">Your planner entries remain saved in this browser on this device. Export a backup before changing devices.</p>
+    </section>
+
+    <!-- CONTAINER FOR PLANNER SHEETS -->
+    <main id="pagesContainer" class="w-full flex flex-col items-center">
+
+        <!-- ================= PAGE 1: WELCOME GUIDE & SYLLABUS REMINDER ================= -->
+        <article id="page-welcome" class="planner-page a4-container text-slate-200 p-6 sm:p-8 shadow-2xl border border-slate-900 rounded-sm relative flex flex-col justify-between mb-8">
+            <div class="space-y-6">
+                <!-- Header -->
+                <header class="text-center space-y-1.5 border-b border-slate-800 pb-5">
+                    <div class="brand-wordmark font-display font-black text-xs sm:text-sm uppercase tracking-[0.4em]">O R V Y N T</div>
+                    <h1 class="font-display font-extrabold text-2xl sm:text-3xl tracking-wider text-silver-gradient uppercase">STUDYFLOW METHODOLOGY</h1>
+                    <p class="text-xs text-electricBlue tracking-widest font-mono uppercase">ICSE Academic Mastery System</p>
+                </header>
+
+                <!-- Syllabus Customisation Reminder Banner -->
+                <div class="p-4 rounded-xl bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900 border border-amber-500/40 shadow-lg space-y-2">
+                    <div class="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
+                        <i class="fa-solid fa-bell text-sm"></i>
+                        <span>Syllabus Customisation Reminder</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        ICSE school term split-ups and unit test portions vary by institution. Please review your official school syllabus breakdown and utilize the <strong class="text-amber-300">"Add Custom Chapter"</strong> tool inside the <em>ICSE Chapter Tracker</em> tab to tailor your revision modules.
+                    </p>
+                </div>
+
+                <!-- Intro Card -->
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed space-y-2">
+                    <h2 class="text-sm font-semibold text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-rocket text-electricBlue"></i> Welcome to ORVYNT StudyFlow
+                    </h2>
+                    <p>Designed for ICSE Class 9 & 10 board aspirants, this digital planner balances structured chapter coverage with high-priority revision loops. Use it smoothly inside Safari or Chrome on your iPad, tablet, or laptop.</p>
+                </div>
+
+                <!-- Feature Breakdown Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div class="bg-slate-900/40 p-3.5 rounded-lg border border-slate-800/80 space-y-1">
+                        <div class="text-electricBlue font-bold text-xs uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-pie"></i> 1. Main Dashboard
+                        </div>
+                        <p class="text-[11px] text-slate-400">Tracks top weekly goals, 3 daily priorities, live ICSE progress meters, and weekly reflections.</p>
+                    </div>
+
+                    <div class="bg-slate-900/40 p-3.5 rounded-lg border border-slate-800/80 space-y-1">
+                        <div class="text-electricBlue font-bold text-xs uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-calendar-day"></i> 2. Daily Study Planner
+                        </div>
+                        <p class="text-[11px] text-slate-400">Structured hourly study blocks, target must-wins, homework submission log, and hydration counter.</p>
+                    </div>
+
+                    <div class="bg-slate-900/40 p-3.5 rounded-lg border border-slate-800/80 space-y-1">
+                        <div class="text-electricBlue font-bold text-xs uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-table-cells"></i> 3. Weekly Timetable
+                        </div>
+                        <p class="text-[11px] text-slate-400">Structure fixed study routines for Monday through Sunday across morning, afternoon, and night slots.</p>
+                    </div>
+
+                    <div class="bg-slate-900/40 p-3.5 rounded-lg border border-slate-800/80 space-y-1">
+                        <div class="text-electricBlue font-bold text-xs uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-check"></i> 4. Chapter Tracker
+                        </div>
+                        <p class="text-[11px] text-slate-400">Preloaded ICSE core chapters with tri-state status badges (<span class="text-red-400">Not Started</span>, <span class="text-amber-400">In Progress</span>, <span class="text-emerald-400">Completed</span>).</p>
+                    </div>
+                </div>
+
+                <!-- Setup Checklist -->
+                <div class="p-4 rounded-xl bg-slate-900/30 border border-slate-800/80 space-y-2.5">
+                    <h3 class="text-xs font-bold text-silverText uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-check text-electricBlue"></i> Interactive Setup Checklist
+                    </h3>
+                    <div class="space-y-2 text-xs">
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="checkbox" data-save="guide_chk_1" class="custom-checkbox">
+                            <span class="text-slate-300">Setup exam countdown dates in the Exam Revision Planner.</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="checkbox" data-save="guide_chk_2" class="custom-checkbox">
+                            <span class="text-slate-300">Customize ICSE chapter list for your current term syllabus.</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="checkbox" data-save="guide_chk_3" class="custom-checkbox">
+                            <span class="text-slate-300">Bookmark this page or export a JSON backup once a week.</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="pt-4 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-500 font-mono uppercase">
+                <span>ORVYNT STUDYFLOW • WELCOME GUIDE</span>
+                <span>PAGE 01</span>
+            </footer>
+        </article>
+
+
+        <!-- ================= PAGE 2: MAIN DASHBOARD ================= -->
+        <article id="page-dashboard" class="planner-page a4-container text-slate-200 p-6 sm:p-8 shadow-2xl border border-slate-900 rounded-sm relative hidden flex-col justify-between mb-8">
+            <div class="space-y-5">
+                <!-- Header -->
+                <header class="text-center pt-1 pb-1 space-y-1">
+                    <div class="brand-wordmark font-display font-black text-xs sm:text-sm uppercase tracking-[0.35em]">O R V Y N T</div>
+                    <h1 class="font-display font-extrabold text-2xl sm:text-3xl tracking-wider text-silver-gradient uppercase">STUDYFLOW DASHBOARD</h1>
+                    <div class="flex justify-center items-center gap-4 text-xs text-slate-400 font-medium pt-1">
+                        <span class="flex items-center gap-1.5">
+                            <i class="fa-regular fa-calendar text-electricBlue text-[10px]"></i>
+                            <span>WEEK OF:</span>
+                            <input type="text" data-save="dash_week_of" placeholder="DD/MM - DD/MM" class="w-28 border-b border-slate-800 focus:border-electricBlue text-center text-slate-200 text-xs px-1">
+                        </span>
+                        <span class="text-slate-700">•</span>
+                        <span class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-bullseye text-electricBlue text-[10px]"></i>
+                            <span>TARGET:</span>
+                            <input type="text" data-save="dash_focus" placeholder="Pre-Board Syllabus Revision" class="w-36 border-b border-slate-800 focus:border-electricBlue text-center text-slate-200 text-xs px-1">
+                        </span>
+                    </div>
+                </header>
+
+                <!-- SECTION 1: THIS WEEK'S GOALS -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-crosshair text-electricBlue text-xs"></i> THIS WEEK'S GOALS
+                        </h2>
+                        <span class="text-[10px] text-slate-500 font-mono">3 MAIN OBJECTIVES</span>
+                    </div>
+                    <div class="electric-divider w-full"></div>
+                    <div class="space-y-2 pt-1">
+                        <div class="flex items-center gap-2.5 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60">
+                            <span class="w-5 h-5 rounded bg-electricBlue/10 text-electricBlue font-mono text-xs flex items-center justify-center font-bold">1</span>
+                            <input type="text" data-save="dash_goal_1" placeholder="Goal 1: Complete Physics Light & Sound practice problems..." class="w-full text-xs">
+                        </div>
+                        <div class="flex items-center gap-2.5 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60">
+                            <span class="w-5 h-5 rounded bg-electricBlue/10 text-electricBlue font-mono text-xs flex items-center justify-center font-bold">2</span>
+                            <input type="text" data-save="dash_goal_2" placeholder="Goal 2: Solve 3 ICSE Maths past papers..." class="w-full text-xs">
+                        </div>
+                        <div class="flex items-center gap-2.5 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60">
+                            <span class="w-5 h-5 rounded bg-electricBlue/10 text-electricBlue font-mono text-xs flex items-center justify-center font-bold">3</span>
+                            <input type="text" data-save="dash_goal_3" placeholder="Goal 3: Finish Organic Chemistry reaction diagrams..." class="w-full text-xs">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: TODAY'S PRIORITIES -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-electricBlue text-xs"></i> TODAY'S PRIORITIES
+                        </h2>
+                        <span class="text-[10px] text-slate-500 font-mono">ACTION ITEMS</span>
+                    </div>
+                    <div class="electric-divider w-full"></div>
+                    <div class="space-y-2 pt-1">
+                        <div class="flex items-center gap-3 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60">
+                            <input type="checkbox" data-save="dash_priority_check_1" class="custom-checkbox">
+                            <input type="text" data-save="dash_priority_text_1" placeholder="Priority Task 1..." class="w-full text-xs">
+                        </div>
+                        <div class="flex items-center gap-3 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60">
+                            <input type="checkbox" data-save="dash_priority_check_2" class="custom-checkbox">
+                            <input type="text" data-save="dash_priority_text_2" placeholder="Priority Task 2..." class="w-full text-xs">
+                        </div>
+                        <div class="flex items-center gap-3 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60">
+                            <input type="checkbox" data-save="dash_priority_check_3" class="custom-checkbox">
+                            <input type="text" data-save="dash_priority_text_3" placeholder="Priority Task 3..." class="w-full text-xs">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: ICSE SUBJECT PROGRESS -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-electricBlue text-xs"></i> ICSE SUBJECT PROGRESS
+                        </h2>
+                        <span class="text-[10px] text-slate-500 font-mono">SYLLABUS COVERAGE</span>
+                    </div>
+                    <div class="electric-divider w-full"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1" id="dashSubjectContainer">
+                        <!-- Populated by JS for ICSE Subjects -->
+                    </div>
+                </section>
+
+                <!-- SECTION 4: WEEKLY REFLECTION -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-brain text-electricBlue text-xs"></i> WEEKLY REFLECTION
+                        </h2>
+                        <span class="text-[10px] text-slate-500 font-mono">INSIGHTS</span>
+                    </div>
+                    <div class="electric-divider w-full"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div class="bg-slate-900/40 p-3 rounded-lg border border-slate-800/70">
+                            <h3 class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <i class="fa-regular fa-circle-check"></i> What went well?
+                            </h3>
+                            <textarea data-save="dash_reflection_well" rows="3" placeholder="Wins, completed topics, consistent study sessions..." class="w-full text-xs leading-relaxed resize-none"></textarea>
+                        </div>
+                        <div class="bg-slate-900/40 p-3 rounded-lg border border-slate-800/70">
+                            <h3 class="text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <i class="fa-solid fa-arrow-up-right-dots"></i> What needs improvement?
+                            </h3>
+                            <textarea data-save="dash_reflection_improve" rows="3" placeholder="Weak spots, distractions, speed & accuracy issues..." class="w-full text-xs leading-relaxed resize-none"></textarea>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <footer class="pt-4 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-500 font-mono uppercase">
+                <span>ORVYNT STUDYFLOW • DASHBOARD</span>
+                <span>PAGE 02</span>
+            </footer>
+        </article>
+
+
+        <!-- ================= PAGE 3: DAILY PLANNER ================= -->
+        <article id="page-daily" class="planner-page a4-container text-slate-200 p-6 sm:p-8 shadow-2xl border border-slate-900 rounded-sm relative hidden flex-col justify-between mb-8">
+            <div class="space-y-4">
+                <!-- Header -->
+                <header class="text-center pt-1 pb-1 space-y-1">
+                    <div class="brand-wordmark font-display font-black text-xs uppercase tracking-[0.35em]">O R V Y N T</div>
+                    <h1 class="font-display font-extrabold text-2xl tracking-wider text-silver-gradient uppercase">DAILY STUDY PLANNER</h1>
+                    <div class="flex justify-center items-center gap-4 text-xs text-slate-400 pt-1">
+                        <span>DATE: <input type="text" data-save="daily_date" placeholder="DD/MM/YYYY" class="w-24 border-b border-slate-800 text-center text-slate-200 text-xs px-1"></span>
+                        <span>DAY: <input type="text" data-save="daily_day" placeholder="Monday" class="w-20 border-b border-slate-800 text-center text-slate-200 text-xs px-1"></span>
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Schedule Box (2 cols) -->
+                    <div class="md:col-span-2 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase">
+                                <i class="fa-regular fa-clock text-electricBlue mr-1"></i> HOURLY SCHEDULE
+                            </h2>
+                        </div>
+                        <div class="electric-divider w-full"></div>
+                        <div class="space-y-1.5 pt-1" id="hourlyScheduleContainer">
+                            <!-- Populated 06:00 to 21:00 -->
+                        </div>
+                    </div>
+
+                    <!-- Side Column (1 col) -->
+                    <div class="space-y-4">
+                        <!-- Top 3 Must-Win Targets -->
+                        <div class="space-y-2">
+                            <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase">
+                                <i class="fa-solid fa-bullseye text-electricBlue mr-1"></i> TOP TARGETS
+                            </h2>
+                            <div class="electric-divider w-full"></div>
+                            <div class="space-y-1.5 pt-1">
+                                <div class="bg-slate-900/40 p-2 rounded border border-slate-800">
+                                    <input type="text" data-save="daily_target_1" placeholder="Target 1..." class="w-full text-xs">
+                                </div>
+                                <div class="bg-slate-900/40 p-2 rounded border border-slate-800">
+                                    <input type="text" data-save="daily_target_2" placeholder="Target 2..." class="w-full text-xs">
+                                </div>
+                                <div class="bg-slate-900/40 p-2 rounded border border-slate-800">
+                                    <input type="text" data-save="daily_target_3" placeholder="Target 3..." class="w-full text-xs">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Homework & Submissions -->
+                        <div class="space-y-2">
+                            <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase">
+                                <i class="fa-solid fa-book text-electricBlue mr-1"></i> ICSE HOMEWORK
+                            </h2>
+                            <div class="electric-divider w-full"></div>
+                            <div class="space-y-1.5 pt-1">
+                                <div class="flex items-center gap-2 bg-slate-900/40 p-2 rounded border border-slate-800">
+                                    <input type="checkbox" data-save="daily_hw_chk_1" class="custom-checkbox">
+                                    <input type="text" data-save="daily_hw_txt_1" placeholder="Maths Ex 5.1..." class="w-full text-xs">
+                                </div>
+                                <div class="flex items-center gap-2 bg-slate-900/40 p-2 rounded border border-slate-800">
+                                    <input type="checkbox" data-save="daily_hw_chk_2" class="custom-checkbox">
+                                    <input type="text" data-save="daily_hw_txt_2" placeholder="Bio Diagrams..." class="w-full text-xs">
+                                </div>
+                                <div class="flex items-center gap-2 bg-slate-900/40 p-2 rounded border border-slate-800">
+                                    <input type="checkbox" data-save="daily_hw_chk_3" class="custom-checkbox">
+                                    <input type="text" data-save="daily_hw_txt_3" placeholder="History Notes..." class="w-full text-xs">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hydration / Focus Counter -->
+                        <div class="space-y-2">
+                            <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase">
+                                <i class="fa-solid fa-droplet text-electricBlue mr-1"></i> HYDRATION
+                            </h2>
+                            <div class="electric-divider w-full"></div>
+                            <div class="flex items-center justify-around bg-slate-900/40 p-2.5 rounded border border-slate-800">
+                                <label><input type="checkbox" data-save="water_1" class="custom-checkbox"></label>
+                                <label><input type="checkbox" data-save="water_2" class="custom-checkbox"></label>
+                                <label><input type="checkbox" data-save="water_3" class="custom-checkbox"></label>
+                                <label><input type="checkbox" data-save="water_4" class="custom-checkbox"></label>
+                                <label><input type="checkbox" data-save="water_5" class="custom-checkbox"></label>
+                                <label><input type="checkbox" data-save="water_6" class="custom-checkbox"></label>
+                            </div>
+                        </div>
+
+                        <!-- Daily Notes -->
+                        <div class="space-y-2">
+                            <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase">
+                                <i class="fa-regular fa-note-sticky text-electricBlue mr-1"></i> DAILY NOTES
+                            </h2>
+                            <div class="electric-divider w-full"></div>
+                            <div class="bg-slate-900/40 p-2.5 rounded border border-slate-800">
+                                <textarea data-save="daily_notes" rows="4" placeholder="Formulas, key concepts, teacher instructions..." class="w-full text-xs leading-relaxed resize-none"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="pt-4 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-500 font-mono uppercase">
+                <span>ORVYNT STUDYFLOW • DAILY PLANNER</span>
+                <span>PAGE 03</span>
+            </footer>
+        </article>
+
+
+        <!-- ================= PAGE 4: WEEKLY TIMETABLE ================= -->
+        <article id="page-timetable" class="planner-page a4-container text-slate-200 p-6 sm:p-8 shadow-2xl border border-slate-900 rounded-sm relative hidden flex-col justify-between mb-8">
+            <div class="space-y-5">
+                <header class="text-center pt-1 pb-1 space-y-1">
+                    <div class="brand-wordmark font-display font-black text-xs uppercase tracking-[0.35em]">O R V Y N T</div>
+                    <h1 class="font-display font-extrabold text-2xl tracking-wider text-silver-gradient uppercase">WEEKLY STUDY TIMETABLE</h1>
+                    <p class="text-xs text-slate-400">Structured Study & Revision Allocations</p>
+                </header>
+
+                <div class="electric-divider w-full"></div>
+
+                <!-- Timetable Grid -->
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-800">
+                                <th class="p-2 text-left text-slate-400 font-mono text-[10px]">SLOT</th>
+                                <th class="p-2 text-slate-200 font-bold uppercase">MON</th>
+                                <th class="p-2 text-slate-200 font-bold uppercase">TUE</th>
+                                <th class="p-2 text-slate-200 font-bold uppercase">WED</th>
+                                <th class="p-2 text-slate-200 font-bold uppercase">THU</th>
+                                <th class="p-2 text-slate-200 font-bold uppercase">FRI</th>
+                                <th class="p-2 text-slate-200 font-bold uppercase">SAT</th>
+                                <th class="p-2 text-slate-200 font-bold uppercase text-electricBlue">SUN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timetableBody">
+                            <!-- Populated with rows for study slots -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <footer class="pt-4 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-500 font-mono uppercase">
+                <span>ORVYNT STUDYFLOW • WEEKLY TIMETABLE</span>
+                <span>PAGE 04</span>
+            </footer>
+        </article>
+
+
+        <!-- ================= PAGE 5: ICSE CHAPTER TRACKER ================= -->
+        <article id="page-tracker" class="planner-page a4-container text-slate-200 p-6 sm:p-8 shadow-2xl border border-slate-900 rounded-sm relative hidden flex-col justify-between mb-8">
+            <div class="space-y-4">
+                <header class="text-center pt-1 pb-1 space-y-1">
+                    <div class="brand-wordmark font-display font-black text-xs uppercase tracking-[0.35em]">O R V Y N T</div>
+                    <h1 class="font-display font-extrabold text-2xl tracking-wider text-silver-gradient uppercase">ICSE CHAPTER TRACKER</h1>
+                    <p class="text-xs text-slate-400">Subject Progress & Tri-State Status System</p>
+                </header>
+
+                <div class="electric-divider w-full"></div>
+
+                <!-- Chapter Tracker Container -->
+                <div class="space-y-4 pt-1 max-h-[210mm] overflow-y-auto pr-1" id="chapterTrackerContainer">
+                    <!-- Dynamic rendering by JS -->
+                </div>
+            </div>
+
+            <footer class="pt-4 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-500 font-mono uppercase">
+                <span>ORVYNT STUDYFLOW • CHAPTER TRACKER</span>
+                <span>PAGE 05</span>
+            </footer>
+        </article>
+
+
+        <!-- ================= PAGE 6: EXAM REVISION PLANNER ================= -->
+        <article id="page-revision" class="planner-page a4-container text-slate-200 p-6 sm:p-8 shadow-2xl border border-slate-900 rounded-sm relative hidden flex-col justify-between mb-8">
+            <div class="space-y-5">
+                <header class="text-center pt-1 pb-1 space-y-1">
+                    <div class="brand-wordmark font-display font-black text-xs uppercase tracking-[0.35em]">O R V Y N T</div>
+                    <h1 class="font-display font-extrabold text-2xl tracking-wider text-silver-gradient uppercase">EXAM REVISION PLANNER</h1>
+                    <p class="text-xs text-slate-400">Board Exam Preparation & 3-Pass Revision Matrix</p>
+                </header>
+
+                <!-- Countdown Header Widget -->
+                <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-hourglass-half text-electricBlue"></i>
+                        <span class="text-xs font-semibold text-slate-200 uppercase">Target Exam Date:</span>
+                    </div>
+                    <input type="date" data-save="exam_target_date" onchange="calculateCountdown()" class="bg-slate-950 border border-slate-700 px-2 py-1 rounded text-xs text-electricBlue font-mono">
+                    <div id="countdownBadge" class="text-xs font-mono font-bold text-amber-400 bg-amber-950/40 px-2.5 py-1 rounded border border-amber-500/30">
+                        Select Exam Date
+                    </div>
+                </div>
+
+                <!-- Revision Matrix Table -->
+                <div class="space-y-2">
+                    <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-check text-electricBlue"></i> REVISION MATRIX
+                    </h2>
+                    <div class="electric-divider w-full"></div>
+                    <div class="overflow-x-auto pt-1">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="text-left text-slate-400 border-b border-slate-800">
+                                    <th class="pb-2">SUBJECT</th>
+                                    <th class="pb-2">EXAM DATE</th>
+                                    <th class="pb-2">TARGET %</th>
+                                    <th class="pb-2">REVISION CHECKLIST</th>
+                                </tr>
+                            </thead>
+                            <tbody id="examScheduleBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Weak Area Focus & Remedial Action -->
+                <div class="space-y-2 pt-2">
+                    <h2 class="font-display font-bold text-xs tracking-widest text-slate-200 uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> WEAK AREAS & ACTION PLAN
+                    </h2>
+                    <div class="electric-divider w-full"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div class="bg-slate-900/40 p-3 rounded-lg border border-slate-800 space-y-2">
+                            <h3 class="text-[11px] font-bold text-amber-400 uppercase">Difficult Topics & Mistakes</h3>
+                            <textarea data-save="rev_weak_topics" rows="5" placeholder="e.g. Organic Chem reaction mechanisms, Physics Refraction ray diagrams..." class="w-full text-xs leading-relaxed resize-none"></textarea>
+                        </div>
+                        <div class="bg-slate-900/40 p-3 rounded-lg border border-slate-800 space-y-2">
+                            <h3 class="text-[11px] font-bold text-electricBlue uppercase">Action Plan & Remedial Steps</h3>
+                            <textarea data-save="rev_action_plan" rows="5" placeholder="e.g. Solve 10 extra PYQs, consult teacher, re-write formula flashcards..." class="w-full text-xs leading-relaxed resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="pt-4 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-500 font-mono uppercase">
+                <span>ORVYNT STUDYFLOW • REVISION PLANNER</span>
+                <span>PAGE 06</span>
+            </footer>
+        </article>
+
+    </main>
+
+    <!-- JAVASCRIPT APP ARCHITECTURE & STATE CONTROLLER -->
+    <script>
+        // Core ICSE Subjects & Pre-populated Class 10 Syllabus
+        let icseSubjects = [
+            { id: 'maths', name: 'Mathematics', chapters: ['Commercial Mathematics (GST, Banking)', 'Algebra & Quadratic Equations', 'Matrices & Arithmetic Progression', 'Coordinate Geometry & Section Formula', 'Trigonometry & Heights & Distances', 'Circle Theorems & Tangents', 'Mensuration (Cylinder, Cone, Sphere)', 'Statistics & Probability'] },
+            { id: 'physics', name: 'Physics', chapters: ['Force, Work, Power & Energy', 'Light & Refraction (Lenses, Spectrum)', 'Sound & Echoes', 'Current Electricity & Household Circuits', 'Electromagnetism', 'Heat & Calorimetry', 'Radioactivity & Modern Physics'] },
+            { id: 'chem', name: 'Chemistry', chapters: ['Periodic Table & Periodic Properties', 'Chemical Bonding', 'Acids, Bases & Salts', 'Analytical Chemistry', 'Mole Concept & Stoichiometry', 'Electrolysis', 'Study of Compounds (HCl, NH3, HNO3, H2SO4)', 'Organic Chemistry'] },
+            { id: 'bio', name: 'Biology', chapters: ['Cell Division & Genetics', 'Absorption by Roots & Transpiration', 'Photosynthesis', 'Circulatory System', 'Excretory System', 'Nervous System & Sense Organs', 'Endocrine System', 'Population & Pollution'] },
+            { id: 'eng', name: 'English (Lang & Lit)', chapters: ['Grammar & Functional Usage', 'Composition & Essay Writing', 'Unseen Passage Comprehension', 'Merchant of Venice (Act III, IV & V)', 'Prose Collection (Short Stories)', 'Poetry Collection'] },
+            { id: 'hcg', name: 'History & Civics', chapters: ['The First War of Independence (1857)', 'Growth of Nationalism & Early Nationalists', 'Mass Phase & Mahatma Gandhi', 'Forward Bloc & INA', 'World Wars & United Nations', 'Union Parliament & Executive', 'Supreme Court & High Courts'] },
+            { id: 'geo', name: 'Geography', chapters: ['Map Work & Topography', 'Climate of India', 'Soils of India', 'Natural Vegetation', 'Water Resources', 'Mineral & Energy Resources', 'Agriculture & Manufacturing Industries', 'Waste Management'] }
+        ];
+
+        // Custom chapters stored separately
+        let customChapters = {};
+
+        // Application Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDashboardSubjects();
+            renderDailySchedule();
+            renderTimetable();
+            renderChapterTracker();
+            renderExamSchedule();
+
+            // Load saved data from LocalStorage
+            loadSavedData();
+            calculateCountdown();
+
+            // Attach Auto-Save listeners
+            attachSaveListeners();
+        });
+
+        // 1. Render Dashboard Subjects
+        function renderDashboardSubjects() {
+            const container = document.getElementById('dashSubjectContainer');
+            if (!container) return;
+            container.innerHTML = icseSubjects.map(sub => `
+                <div class="bg-slate-900/50 p-2.5 rounded-lg border border-slate-800/70 space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[11px] font-bold text-silverText uppercase">${sub.name}</span>
+                        <span id="dash_prog_val_${sub.id}" class="text-[11px] font-mono text-electricBlue font-semibold">0%</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700/40">
+                        <div id="dash_prog_bar_${sub.id}" class="h-full bg-gradient-to-r from-blue-600 to-electricBlue transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateDashSubjectBar(subId, val) {
+            const bar = document.getElementById(`dash_prog_bar_${subId}`);
+            const text = document.getElementById(`dash_prog_val_${subId}`);
+            if (bar && text) {
+                bar.style.width = val + '%';
+                text.innerText = val + '%';
+            }
+        }
+
+        // 2. Render Daily Hourly Schedule
+        function renderDailySchedule() {
+            const container = document.getElementById('hourlyScheduleContainer');
+            if (!container) return;
+            const hours = ['06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
+            container.innerHTML = hours.map(h => `
+                <div class="flex items-center gap-2 bg-slate-900/30 p-1.5 rounded border border-slate-800/60">
+                    <span class="text-[10px] font-mono text-electricBlue font-bold w-12 text-center">${h}</span>
+                    <input type="text" data-save="daily_slot_${h.replace(':','')}" placeholder="..." class="w-full text-xs">
+                </div>
+            `).join('');
+        }
+
+        // 3. Render Weekly Timetable Grid
+        function renderTimetable() {
+            const tbody = document.getElementById('timetableBody');
+            if (!tbody) return;
+            const slots = ['Morning Slot 1', 'Morning Slot 2', 'Afternoon Slot', 'Evening Study', 'Night Revision'];
+            tbody.innerHTML = slots.map((s, idx) => `
+                <tr class="border-b border-slate-800/60">
+                    <td class="p-2 text-[10px] font-mono text-slate-400 bg-slate-900/40">${s}</td>
+                    ${[1,2,3,4,5,6,7].map(day => `
+                        <td class="p-1 border-l border-slate-800/40">
+                            <input type="text" data-save="tt_${idx}_${day}" placeholder="Subject" class="w-full text-center text-xs py-1">
+                        </td>
+                    `).join('')}
+                </tr>
+            `).join('');
+        }
+
+        // 4. Render ICSE Chapter Tracker & Dynamic Custom Chapters
+        function renderChapterTracker() {
+            const container = document.getElementById('chapterTrackerContainer');
+            if (!container) return;
+
+            container.innerHTML = icseSubjects.map(sub => {
+                const list = [...sub.chapters, ...(customChapters[sub.id] || [])];
+                return `
+                    <div class="bg-slate-900/40 p-3.5 rounded-lg border border-slate-800 space-y-2.5">
+                        <div class="flex flex-wrap justify-between items-center gap-2">
+                            <h3 class="text-xs font-bold text-silverText uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-book-bookmark text-electricBlue"></i> ${sub.name}
+                            </h3>
+                            <div class="flex items-center gap-3">
+                                <span id="tracker_pct_${sub.id}" class="text-[11px] font-mono text-electricBlue font-bold">0% Completed</span>
+                                <button onclick="promptAddCustomChapter('${sub.id}')" class="no-print text-[10px] bg-slate-800 hover:bg-slate-700 text-electricBlue px-2 py-0.5 rounded border border-electricBlue/30 transition">
+                                    + Add Chapter
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="tracker_bar_${sub.id}" class="h-full bg-emerald-400 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div class="space-y-1.5 pt-1">
+                            ${list.map((chap, cIdx) => `
+                                <div class="flex items-center justify-between bg-slate-950/60 p-2 rounded border border-slate-800/80 text-xs">
+                                    <span class="text-slate-300 text-xs">${chap}</span>
+                                    <select data-save="chap_status_${sub.id}_${cIdx}" onchange="recalcChapterProgress('${sub.id}')" class="status-select px-2 py-0.5 rounded text-[11px] font-medium font-mono cursor-pointer bg-slate-900 border border-slate-700">
+                                        <option value="Not Started" class="bg-slate-900 text-red-400">Not Started</option>
+                                        <option value="In Progress" class="bg-slate-900 text-amber-400">In Progress</option>
+                                        <option value="Completed" class="bg-slate-900 text-emerald-400">Completed</option>
+                                    </select>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Apply select badge colors
+            applySelectStyles();
+        }
+
+        function promptAddCustomChapter(subId) {
+            const title = prompt("Enter Custom Chapter / Unit Name:");
+            if (title && title.trim()) {
+                if (!customChapters[subId]) customChapters[subId] = [];
+                customChapters[subId].push(title.trim());
+                saveAllData();
+                renderChapterTracker();
+                attachSaveListeners();
+                loadSavedData();
+            }
+        }
+
+        function recalcChapterProgress(subId) {
+            const sub = icseSubjects.find(s => s.id === subId);
+            if (!sub) return;
+            const total = sub.chapters.length + (customChapters[subId] || []).length;
+            let completed = 0;
+
+            for (let i = 0; i < total; i++) {
+                const sel = document.querySelector(`[data-save="chap_status_${subId}_${i}"]`);
+                if (sel) {
+                    // Update badge style class
+                    sel.className = `status-select px-2 py-0.5 rounded text-[11px] font-medium font-mono cursor-pointer bg-slate-900 border ${
+                        sel.value === 'Completed' ? 'status-completed' :
+                        sel.value === 'In Progress' ? 'status-in-progress' : 'status-not-started'
+                    }`;
+                    if (sel.value === 'Completed') completed++;
+                }
+            }
+
+            const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+            const bar = document.getElementById(`tracker_bar_${subId}`);
+            const txt = document.getElementById(`tracker_pct_${subId}`);
+            if (bar && txt) {
+                bar.style.width = pct + '%';
+                txt.innerText = pct + '% Completed';
+            }
+
+            // Sync with Dashboard Progress Bar
+            updateDashSubjectBar(subId, pct);
+        }
+
+        function applySelectStyles() {
+            document.querySelectorAll('.status-select').forEach(sel => {
+                sel.className = `status-select px-2 py-0.5 rounded text-[11px] font-medium font-mono cursor-pointer bg-slate-900 border ${
+                    sel.value === 'Completed' ? 'status-completed' :
+                    sel.value === 'In Progress' ? 'status-in-progress' : 'status-not-started'
+                }`;
+            });
+        }
+
+        // 5. Render Exam Revision Schedule Matrix
+        function renderExamSchedule() {
+            const tbody = document.getElementById('examScheduleBody');
+            if (!tbody) return;
+            tbody.innerHTML = icseSubjects.map(sub => `
+                <tr class="border-b border-slate-800/50">
+                    <td class="py-2 text-xs font-bold text-silverText">${sub.name}</td>
+                    <td class="py-2"><input type="text" data-save="exam_date_${sub.id}" placeholder="DD/MM" class="w-16 text-xs"></td>
+                    <td class="py-2"><input type="text" data-save="exam_target_${sub.id}" placeholder="95%" class="w-14 text-xs"></td>
+                    <td class="py-2">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <label class="flex items-center gap-1 text-[11px] text-slate-300 cursor-pointer">
+                                <input type="checkbox" data-save="exam_r1_${sub.id}" class="custom-checkbox"> R1 Notes
+                            </label>
+                            <label class="flex items-center gap-1 text-[11px] text-slate-300 cursor-pointer">
+                                <input type="checkbox" data-save="exam_r2_${sub.id}" class="custom-checkbox"> R2 Concepts
+                            </label>
+                            <label class="flex items-center gap-1 text-[11px] text-slate-300 cursor-pointer">
+                                <input type="checkbox" data-save="exam_pyq_${sub.id}" class="custom-checkbox"> R3 PYQs & Papers
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Countdown Calculator
+        function calculateCountdown() {
+            const dateInput = document.querySelector('[data-save="exam_target_date"]');
+            const badge = document.getElementById('countdownBadge');
+            if (!dateInput || !badge) return;
+
+            if (dateInput.value) {
+                const target = new Date(dateInput.value);
+                const today = new Date();
+                const diffTime = target - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays >= 0) {
+                    badge.innerText = `${diffDays} Days Remaining`;
+                    badge.className = "text-xs font-mono font-bold text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded border border-emerald-500/30";
+                } else {
+                    badge.innerText = `Exams In Progress / Completed`;
+                    badge.className = "text-xs font-mono font-bold text-electricBlue bg-slate-900 px-2.5 py-1 rounded border border-electricBlue/30";
+                }
+            }
+        }
+
+        // Tab Navigation Switcher
+        function switchTab(pageId) {
+            document.querySelectorAll('.planner-page').forEach(page => {
+                page.classList.add('hidden');
+                page.classList.remove('flex');
+            });
+            
+            const activePage = document.getElementById(`page-${pageId}`);
+            if (activePage) {
+                activePage.classList.remove('hidden');
+                activePage.classList.add('flex');
+            }
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-electricBlue/10', 'text-electricBlue', 'border-electricBlue/40');
+                btn.classList.add('border-transparent', 'text-slate-400');
+            });
+
+            const activeTab = document.getElementById(`tab-${pageId}`);
+            if (activeTab) {
+                activeTab.classList.add('bg-electricBlue/10', 'text-electricBlue', 'border-electricBlue/40');
+                activeTab.classList.remove('border-transparent', 'text-slate-400');
+            }
+        }
+
+        // Print Triggers
+        function triggerPrintCurrent() { window.print(); }
+
+        function triggerPrintAll() {
+            document.querySelectorAll('.planner-page').forEach(page => {
+                page.classList.remove('hidden');
+                page.classList.add('flex');
+            });
+            window.print();
+            const activeTabBtn = document.querySelector('.tab-btn.text-electricBlue');
+            if (activeTabBtn) {
+                const pageId = activeTabBtn.id.replace('tab-', '');
+                switchTab(pageId);
+            }
+        }
+
+        // Auto-Save Engine (localStorage)
+        let saveTimeout;
+        function attachSaveListeners() {
+            document.querySelectorAll('input, textarea, select').forEach(element => {
+                element.removeEventListener('input', triggerAutoSave);
+                element.removeEventListener('change', triggerAutoSave);
+                element.addEventListener('input', triggerAutoSave);
+                element.addEventListener('change', triggerAutoSave);
+            });
+        }
+
+        function triggerAutoSave() {
+            const indicator = document.getElementById('saveText');
+            if (indicator) indicator.innerText = 'Saving...';
+
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveAllData();
+                if (indicator) indicator.innerText = 'Saved to device';
+            }, 350);
+        }
+
+        function saveAllData() {
+            const data = {};
+            document.querySelectorAll('[data-save]').forEach(el => {
+                const key = el.getAttribute('data-save');
+                if (el.type === 'checkbox') {
+                    data[key] = el.checked;
+                } else {
+                    data[key] = el.value;
+                }
+            });
+            
+            const fullPayload = {
+                inputs: data,
+                customChapters: customChapters
+            };
+
+            localStorage.setItem('ORVYNT_STUDYFLOW_FULL', JSON.stringify(fullPayload));
+        }
+
+        function loadSavedData() {
+            const raw = localStorage.getItem('ORVYNT_STUDYFLOW_FULL');
+            if (!raw) return;
+            try {
+                const payload = JSON.parse(raw);
+                if (payload.customChapters) {
+                    customChapters = payload.customChapters;
+                    renderChapterTracker();
+                }
+
+                if (payload.inputs) {
+                    Object.keys(payload.inputs).forEach(key => {
+                        const el = document.querySelector(`[data-save="${key}"]`);
+                        if (el) {
+                            if (el.type === 'checkbox') {
+                                el.checked = payload.inputs[key];
+                            } else {
+                                el.value = payload.inputs[key];
+                            }
+                        }
+                    });
+                }
+
+                // Recalculate progress bars across all subjects
+                icseSubjects.forEach(sub => recalcChapterProgress(sub.id));
+            } catch(e) {
+                console.error("Error restoring saved state", e);
+            }
+        }
+
+        // Export JSON Backup File
+        function exportBackupJSON() {
+            saveAllData();
+            const raw = localStorage.getItem('ORVYNT_STUDYFLOW_FULL') || '{}';
+            const blob = new Blob([raw], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ORVYNT_StudyFlow_Backup_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Import JSON Backup File
+        function importBackupJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.inputs || parsed.customChapters) {
+                        localStorage.setItem('ORVYNT_STUDYFLOW_FULL', JSON.stringify(parsed));
+                        loadSavedData();
+                        attachSaveListeners();
+                        calculateCountdown();
+                        alert("Backup successfully restored!");
+                    } else {
+                        alert("Invalid ORVYNT backup JSON format.");
+                    }
+                } catch(err) {
+                    alert("Failed to parse the backup file.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Reset / Clear Data
+        function clearAllData() {
+            if (confirm("Are you sure you want to reset all planner fields and customized chapters?")) {
+                localStorage.removeItem('ORVYNT_STUDYFLOW_FULL');
+                customChapters = {};
+                document.querySelectorAll('input[type="text"], input[type="date"]').forEach(i => i.value = '');
+                document.querySelectorAll('textarea').forEach(t => t.value = '');
+                document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+                document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+                renderChapterTracker();
+                attachSaveListeners();
+                icseSubjects.forEach(sub => recalcChapterProgress(sub.id));
+                calculateCountdown();
+            }
+        }
+    </script>
+
+    <!-- ORVYNT AI COMPANION -->
+    <button class="ai-fab no-print" onclick="openOrvyntAI()" aria-label="Open ORVYNT AI">
+      <i class="fa-solid fa-sparkles mr-2"></i>Ask ORVYNT
+    </button>
+    <div id="orvyntAIOverlay" class="ai-overlay no-print" role="dialog" aria-modal="true" aria-label="ORVYNT AI Study Companion">
+      <section class="ai-panel">
+        <header class="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-700 bg-slate-900">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-cyan-300/15 border border-cyan-300/40 flex items-center justify-center text-cyan-300"><i class="fa-solid fa-sparkles"></i></div>
+            <div><h2 class="font-bold text-sm text-white">ORVYNT AI Companion</h2><p class="text-[10px] text-slate-400">Study help · ICSE tutor · Planner guide</p></div>
+          </div>
+          <button onclick="closeOrvyntAI()" class="w-9 h-9 rounded-lg bg-slate-800 text-slate-300" aria-label="Close chat"><i class="fa-solid fa-xmark"></i></button>
+        </header>
+        <div class="px-4 py-3 border-b border-slate-800 flex flex-wrap gap-2">
+          <button class="ai-chip" onclick="useAISuggestion('Explain a difficult ICSE concept step by step.')">Explain a concept</button>
+          <button class="ai-chip" onclick="useAISuggestion('Help me make a realistic study plan for today.')">Plan my study</button>
+          <button class="ai-chip" onclick="useAISuggestion('How do I use the Chapter Tracker?')">Planner help</button>
+        </div>
+        <div id="orvyntAIMessages" class="ai-messages" aria-live="polite">
+          <div class="ai-bubble ai-assistant">Hello! I'm ORVYNT AI. Ask an academic doubt or get help using StudyFlow. I can explain concepts step by step. Choose a suggestion above or type your question below.</div>
+        </div>
+        <div class="border-t border-slate-700 p-3">
+          <div class="flex gap-2">
+            <textarea id="orvyntAIInput" rows="2" maxlength="1200" placeholder="Type your doubt here..." class="flex-1 resize-none rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-sm text-slate-100 placeholder-slate-500 focus:border-cyan-300"></textarea>
+            <button id="orvyntAISend" onclick="sendOrvyntAI()" class="self-end rounded-xl bg-cyan-300 px-4 py-3 font-bold text-slate-950 disabled:opacity-50"><i class="fa-solid fa-arrow-up"></i></button>
+          </div>
+          <p id="orvyntAIStatus" class="text-[10px] text-slate-500 mt-2">AI connection not configured yet. Add your secure Worker URL in the setup instructions.</p>
+          <p class="text-[10px] text-slate-600 mt-1">Avoid sharing passwords, addresses, contact details or other private information.</p>
+        </div>
+      </section>
+    </div>
+
+
+    <script>
+    // ORVYNT AI: set this to the deployed HTTPS Cloudflare Worker URL.
+    // Example: https://orvynt-studyflow-ai.<your-subdomain>.workers.dev
+    const ORVYNT_AI_ENDPOINT = "PASTE_YOUR_WORKER_URL_HERE";
+    let orvyntAIHistory = [];
+    function openOrvyntAI() {
+      document.getElementById('orvyntAIOverlay').classList.add('open');
+      setTimeout(() => document.getElementById('orvyntAIInput').focus(), 80);
+    }
+    function closeOrvyntAI() { document.getElementById('orvyntAIOverlay').classList.remove('open'); }
+    function useAISuggestion(text) {
+      document.getElementById('orvyntAIInput').value = text;
+      document.getElementById('orvyntAIInput').focus();
+    }
+    function addAIMessage(text, role) {
+      const box = document.getElementById('orvyntAIMessages');
+      const bubble = document.createElement('div');
+      bubble.className = 'ai-bubble ' + (role === 'user' ? 'ai-user' : 'ai-assistant');
+      bubble.textContent = text;
+      box.appendChild(bubble);
+      box.scrollTop = box.scrollHeight;
+      return bubble;
+    }
+    async function sendOrvyntAI() {
+      const input = document.getElementById('orvyntAIInput');
+      const send = document.getElementById('orvyntAISend');
+      const status = document.getElementById('orvyntAIStatus');
+      const question = input.value.trim();
+      if (!question) return;
+      if (ORVYNT_AI_ENDPOINT === "PASTE_YOUR_WORKER_URL_HERE") {
+        status.textContent = "Setup needed: deploy the secure Worker, then add its URL in ORVYNT_AI_ENDPOINT.";
+        addAIMessage("The chat interface is ready, but the secure AI connection has not been configured yet. Follow the README setup steps to connect it.", "assistant");
+        return;
+      }
+      addAIMessage(question, 'user');
+      input.value = '';
+      send.disabled = true;
+      status.textContent = 'ORVYNT AI is thinking...';
+      const pending = addAIMessage('Thinking…', 'assistant');
+      try {
+        const response = await fetch(ORVYNT_AI_ENDPOINT.replace(/\/$/, '') + '/api/chat', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({messages: [...orvyntAIHistory, {role:'user', content:question}]})
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'The AI service could not respond.');
+        pending.textContent = data.reply || 'I could not create a response. Please try again.';
+        orvyntAIHistory.push({role:'user',content:question},{role:'assistant',content:pending.textContent});
+        if (orvyntAIHistory.length > 16) orvyntAIHistory = orvyntAIHistory.slice(-16);
+        status.textContent = 'Connected to ORVYNT AI.';
+      } catch (error) {
+        pending.textContent = 'Connection issue: ' + error.message + ' Check the Worker deployment and URL.';
+        status.textContent = 'Could not connect. Your planner data is unaffected.';
+      } finally {
+        send.disabled = false;
+        input.focus();
+      }
+    }
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeOrvyntAI();
+      if (event.key === 'Enter' && event.target && event.target.id === 'orvyntAIInput' && !event.shiftKey) {
+        event.preventDefault(); sendOrvyntAI();
+      }
+    });
+    document.getElementById('orvyntAIOverlay')?.addEventListener('click', (event) => {
+      if (event.target.id === 'orvyntAIOverlay') closeOrvyntAI();
+    });
+    </script>
+
+</body>
+</html>

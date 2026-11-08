@@ -1,0 +1,8 @@
+name = "orvynt-studyflow-ai"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+# Replace with your exact GitHub Pages origin, with no trailing slash.
+ALLOWED_ORIGIN = "https://mk12master.github.io"
+OPENAI_MODEL = "gpt-4.1-mini"
